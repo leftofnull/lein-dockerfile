@@ -1,5 +1,7 @@
 # lein-dockerfile
 
+[![Clojars Project](https://img.shields.io/clojars/v/lein-dockerfile.svg)](https://clojars.org/lein-dockerfile)
+
 A Leiningen plugin to make a Dockerfile for the project.
 
 ## Usage
