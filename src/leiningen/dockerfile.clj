@@ -1,38 +1,41 @@
-(ns leiningen.docker
+(ns leiningen.dockerfile
   (:require [clojure.string :as string]
             [leiningen.uberjar :refer [uberjar]]))
 
-(defn dockercmd
+(defn dockercmd-str
   [cmd]
   (->> (for [s (if (sequential? cmd) cmd [cmd])] (str "\"" s "\""))
        (string/join ",")
        (format "[%s]")))
 
-(defn env-strings
+(defn env-str
   [envs]
   (->> (for [[k v] envs] (str "ENV " k "=" v))
        (string/join "\n")))
 
-(defn expose-str [[c-port h-port]] (str "EXPOSE " c-port " " h-port))
-(defn files-str [from-to] (str "COPY " (dockercmd from-to)))
+(defn expose-str
+  [exposes]
+  (->> (for [[c-port h-port] exposes] (str "EXPOSE " c-port " " h-port))
+       (string/join "\n")))
 
-(defn dockerfile
+(defn files-str
+  [files]
+  (->> (for [from-to files] (str "COPY " (dockercmd-str from-to)))
+       (string/join "\n")))
+
+(defn dockerfile-str
   [{:keys [from-image exposes envs files work-dir instructions entry-point cmd jar-file]}]
   (let [ep (or entry-point ["/usr/bin/java" "-jar" "uberjar.jar"])
         c (or cmd [""])
         wd (or work-dir "/")
-        ep-str (dockercmd ep)
-        cmd-str (dockercmd c)]
+        ep-str (dockercmd-str ep)
+        cmd-str (dockercmd-str c)]
     (->> (concat [(str "FROM " from-image)]
-                 [(->>
-                   (for [e exposes] (expose-str e))
-                   (string/join "\n"))]
-                 [(env-strings envs)]
+                 [(expose-str exposes)]
+                 [(env-str envs)]
                  [(str "WORKDIR " wd)]
-                 [(->>
-                   (for [f files] (files-str f))
-                   (string/join "\n"))]
-                 [(str "COPY " (dockercmd [jar-file "uberjar.jar"]))]
+                 [(files-str files)]
+                 [(str "COPY " (dockercmd-str [jar-file "uberjar.jar"]))]
                  instructions
                  [(str "ENTRYPOINT " ep-str)]
                  [(str "CMD " cmd-str)])
@@ -41,10 +44,10 @@
 
 (defn write-file [contents] (spit "Dockerfile" contents))
 
-(defn docker
+(defn dockerfile
   [project & args]
   (let [jar (uberjar project)
-        dockerimage (merge {:from-image "java:8-jre"
-                            :jar-file jar}
-                           (:docker project))]
-    (write-file (dockerfile dockerimage))))
+        docker-options (merge {:from-image "java:8-jre"
+                               :jar-file jar}
+                              (:dockerfile project))]
+    (write-file (dockerfile-str docker-options))))

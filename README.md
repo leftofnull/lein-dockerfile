@@ -1,4 +1,4 @@
-# lein-docker
+# lein-dockerfile
 
 A Leiningen plugin to make a Dockerfile for the project.
 
@@ -6,15 +6,15 @@ A Leiningen plugin to make a Dockerfile for the project.
 
 Use this for user-level plugins:
 
-Put `[docker "1.0.0"]` into the `:plugins` vector of your `:user`
+Put `[lein-dockerfile "1.0.0"]` into the `:plugins` vector of your `:user`
 profile.
 
 Use this for project-level plugins:
 
-Put `[docker "1.0.0"]` into the `:plugins` vector of your project.clj.
+Put `[lein-dockerfile "1.0.0"]` into the `:plugins` vector of your project.clj.
 
 ```
-$ lein docker
+$ lein dockerfile
 ```
 
 Without any customization you will end up with a `Dockerfile` like:
@@ -35,17 +35,17 @@ _NOTE: All of these are optional_
 
 ```
 (defproject foo "0.0.1-SNAPSHOT"
-  :docker {:work-dir "foo/"
-           :envs [["PS1" "\":>\""]
-                  ["JAVA_OPTS" "\"-Xmx64g\""]]
-           :exposes [[80 80]
-                     [443 443]]
-           :from-image "java:8-jre"
-           :files [["resources/config.edn" "config.edn"]]
-           :instructions ["RUN sudo apt-get update"
-                          "RUN sudo apt-get upgrade --all"]
-           :entry-point ["/usr/bin/java" "-jar" "uberjar.jar"]
-           :cmd ["--help"]})
+  :dockerfile {:work-dir "foo/"
+               :envs [["PS1" "\":>\""]
+                      ["JAVA_OPTS" "\"-Xmx64g\""]]
+               :exposes [[80 80]
+                         [443 443]]
+               :from-image "java:8-jre"
+               :files [["resources/config.edn" "config.edn"]]
+               :instructions ["RUN sudo apt-get update"
+                              "RUN sudo apt-get upgrade --all"]
+               :entry-point ["/usr/bin/java" "-jar" "uberjar.jar"]
+               :cmd ["--help"]})
 ```
 
 This example would result in a `Dockerfile` like:
