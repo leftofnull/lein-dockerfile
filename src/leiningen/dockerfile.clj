@@ -27,16 +27,15 @@
   [{:keys [from-image exposes envs files work-dir instructions entry-point cmd jar-file]}]
   (let [ep (or entry-point ["/usr/bin/java" "-jar" "uberjar.jar"])
         c (or cmd [""])
-        wd (or work-dir "/")
         ep-str (dockercmd-str ep)
         cmd-str (dockercmd-str c)]
     (->> (concat [(str "FROM " from-image)]
                  [(expose-str exposes)]
                  [(env-str envs)]
-                 [(str "WORKDIR " wd)]
+                 instructions
+                 [(if (and work-dir) (str "WORKDIR " work-dir) "")]
                  [(files-str files)]
                  [(str "COPY " (dockercmd-str [jar-file "uberjar.jar"]))]
-                 instructions
                  [(str "ENTRYPOINT " ep-str)]
                  [(str "CMD " cmd-str)])
          (remove empty?)
